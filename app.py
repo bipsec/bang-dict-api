@@ -10,7 +10,45 @@ df = pd.read_csv(data_file_path)
 
 
 # print(df)
+@app.route('/dictionary/word/', methods=['GET'])
+def get_word_details():
+    word = request.args.get('word')
 
+    if not word:
+        return jsonify({'error': 'Word parameter not provided'}), 400
+
+    # Filter rows where the 'word' column matches the input word
+    filtered_df = df[df['word'] == word]
+
+    if filtered_df.empty:
+        return jsonify({'error': 'Word not found'}), 404
+
+    # Create the response dictionary
+    response = {
+        'word': word,
+        'similar_spellings': []
+    }
+    # Create a dictionary to store meanings based on meaning_no
+    meaning_dict = {}
+
+    # Iterate through the filtered DataFrame and construct the response
+    for idx, row in filtered_df.iterrows():
+        meaning = row['meaning']
+        meaning_no = row['number']
+
+        if meaning_no in meaning_dict:
+            meaning_dict[meaning_no]["meanings"].append(meaning)
+        else:
+            meaning_dict[meaning_no] = {
+                'id': len(meaning_dict) + 1,
+                'meaning_no': meaning_no,
+                'meanings': [meaning]
+            }
+
+    # Append the meanings to the response similar_spellings list
+    response['similar_spellings'] = list(meaning_dict.values())
+
+    return jsonify(response)
 
 @app.route('/dictionary/all_words', methods=['GET'])
 def get_all_word_details():
