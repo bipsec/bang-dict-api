@@ -10,18 +10,16 @@ df = pd.read_csv(data_file_path)
 
 
 # print(df)
-@app.route('/dictionary/word/', methods=['GET'])
+@app.route('/dictionary', methods=['GET'])
 def get_word_details():
     word = request.args.get('word')
-
     if not word:
-        return jsonify({'error': 'Word parameter not provided'}), 400
+        return "Word parameter not found"
 
     # Filter rows where the 'word' column matches the input word
     filtered_df = df[df['word'] == word]
-
     if filtered_df.empty:
-        return jsonify({'error': 'Word not found'}), 404
+        return "Word parameter not found"
 
     # Create the response dictionary
     response = {
@@ -50,7 +48,23 @@ def get_word_details():
 
     return jsonify(response)
 
-@app.route('/dictionary/all_words', methods=['GET'])
+
+@app.route('/dictionary/words', methods=['GET'])
+def get_words_from_letter():
+    letter = request.args.get('letter')
+    if not letter:
+        return "letter parameter not found"
+
+    words = df[df['word'].str.startswith(letter)]['word'].tolist()
+
+    response = {
+        "letter": letter,
+        "words": words
+    }
+    return jsonify(response)
+
+
+@app.route('/dictionary/all-words', methods=['GET'])
 def get_all_word_details():
     # Create a dictionary to store all word details
     all_word_details = {}
@@ -90,6 +104,7 @@ def get_all_word_details():
             }
 
     return jsonify(list(all_word_details.values()))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
