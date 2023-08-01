@@ -1,36 +1,54 @@
 ## Table of Contents
 
-## Clone Project
+
+### Project Structure
+
+```sh
+bang-dict-api/
+├── app/
+│   ├── celery/
+│   │  ├──__init__.py
+│   │  ├──app.py
+│   │  ├──worker.py
+│   ├── core/
+│   │   ├── __init__.py
+│   │   ├── config.py
+│   ├── events/
+│   │   ├── __init__.py
+│   │   └── startup_shutdown.py
+│   ├── db/
+│   │   ├── __init__.py
+│   │   ├── database.py
+│   ├── data/
+│   │   ├── __init__.py
+│   │   ├── demo_data.csv
+│   ├── services/
+│   │   ├── __init__.py
+│   │   └── ...
+│   ├── main.py
+├── .env.example
+├── .gitignore
+├── Dockerfile
+├── docker-compose.yml
+├── README.md
+└── requirements.txt
+```
+
+
+### Up and Run
 
 ```sh
 git clone https://github.com/bipsec/bang-dict-api.git
+cd bang-dict-api
+docker-compose up --build
 ```
 
-## Virtual Env Setup
-```python
-# Create a virtual env
-python3.10 -m venv venv
-
-# activate the venv
-source venv/bin/activate
-```
-```python
-pip install -r requirements.txt
-```
-
-
-## Run
-
-```sh
-python app.py
-```
-
-# API Checking
+### API Checking
 
 ```sh
 # for single word
-http://localhost:5000/dictionary/word/?word=<word>
+http://0.0.0.0:8002/dictionary/words?word=<word>
 
-# for the entire dictioanry
-http://localhost:5000/dictionary/all_words
+# for all word in the dictionary
+http://0.0.0.0:8002/dictionary/all_words
 ```
