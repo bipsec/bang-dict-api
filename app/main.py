@@ -1,10 +1,12 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 
 app = FastAPI()
 
 # Load the CSV data into a DataFrame
 data = pd.read_csv("app/data/demo_data.csv")
+data = data.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
 
 
 @app.get("/dictionary/words/")
@@ -60,3 +62,8 @@ async def get_all_words():
         all_responses.append(response)
 
     return all_responses
+
+
+# Configure CORS middleware to allow requests from all origins
+origins = ["*"]
+app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["*"], allow_headers=["*"])
