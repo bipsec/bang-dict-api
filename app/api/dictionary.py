@@ -62,5 +62,34 @@ async def get_all_words():
 
     return all_responses
 
+@router.get("/dictionary/words_by_letter/")
+async def get_words_by_letter(letter: str):
+    # Validate the input letter
+    if len(letter) != 1 or not letter.isalpha():
+        raise HTTPException(status_code=400, detail="Invalid input. Please provide a single letter.")
+
+    # Filter the rows where the word starts with the input letter
+    filtered_data = data[data["word"].str.startswith(letter, na=False)]
+
+    responses = []
+    for word in filtered_data["word"].unique():
+        similar_spellings = []
+        word_data = filtered_data[filtered_data["word"] == word]
+        grouped_data = word_data.groupby(["number", "meaning"])["word"].count().reset_index()
+        for idx, row in grouped_data.iterrows():
+            similar_spellings.append({
+                "id": idx + 1,
+                "meaning_no": row["number"],
+                "meanings": [row["meaning"]]
+            })
+
+        response = {
+            "similar_spellings": similar_spellings,
+            "word": word
+        }
+        responses.append(response)
+
+    return responses
+
 
 
