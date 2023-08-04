@@ -8,7 +8,7 @@ data = pd.read_csv("app/data/demo_data.csv")
 data = data.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
 
 
-@router.get("/dictionary/words/")
+@router.get("/dictionary/words")
 async def get_similar_spellings(word: str):
     try:
         # Filter the rows where the word matches the input word
@@ -38,7 +38,7 @@ async def get_similar_spellings(word: str):
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
-@router.get("/dictionary/all_words/")
+@router.get("/dictionary/all_words")
 async def get_all_words():
     all_words = data["word"].unique().tolist()
 
@@ -62,7 +62,7 @@ async def get_all_words():
 
     return all_responses
 
-@router.get("/dictionary/words_by_letter/")
+@router.get("/dictionary/words_by_letter")
 async def get_words_by_letter(letter: str):
     # Validate the input letter
     if len(letter) != 1 or not letter.isalpha():
