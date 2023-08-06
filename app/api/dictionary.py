@@ -7,17 +7,16 @@ router = APIRouter()
 data = pd.read_csv("app/data/demo_data.csv")
 data = data.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
 
+data = data.fillna('')
+
 
 @router.get("/dictionary/words")
 async def get_similar_spellings(word: str):
     try:
-        # Filter the rows where the word matches the input word
         filtered_data = data[data["word"] == word]
 
-        # Group the data by 'number' and 'meaning' columns
         grouped_data = filtered_data.groupby(["number", "meaning"])["word"].count().reset_index()
 
-        # Convert the grouped data to the desired JSON format
         similar_spellings = []
         for idx, row in grouped_data.iterrows():
             similar_spellings.append({
@@ -32,16 +31,13 @@ async def get_similar_spellings(word: str):
         }
         return response
     except Exception as e:
-        # Log the error for debugging purposes
         print("Error:", e)
-        # Raise an HTTPException with a 500 status code to indicate a server error
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
 @router.get("/dictionary/all_words")
 async def get_all_words():
     all_words = data["word"].unique().tolist()
-
     all_responses = []
     for word in all_words:
         similar_spellings = []
@@ -62,13 +58,12 @@ async def get_all_words():
 
     return all_responses
 
+
 @router.get("/dictionary/words_by_letter")
 async def get_words_by_letter(letter: str):
-    # Validate the input letter
     if len(letter) != 1 or not letter.isalpha():
         raise HTTPException(status_code=400, detail="Invalid input. Please provide a single letter.")
 
-    # Filter the rows where the word starts with the input letter
     filtered_data = data[data["word"].str.startswith(letter, na=False)]
 
     responses = []
@@ -77,10 +72,11 @@ async def get_words_by_letter(letter: str):
         word_data = filtered_data[filtered_data["word"] == word]
         grouped_data = word_data.groupby(["number", "meaning"])["word"].count().reset_index()
         for idx, row in grouped_data.iterrows():
+
             similar_spellings.append({
                 "id": idx + 1,
                 "meaning_no": row["number"],
-                "meanings": [row["meaning"]]
+                "meaning": row["meaning"],
             })
 
         response = {
@@ -92,4 +88,30 @@ async def get_words_by_letter(letter: str):
     return responses
 
 
+@router.get("/dictionary/word")
+async def get_word_details(word: str):
+    details = data[data["word"] == word]
+    similar_spellings = []
+    ipa = ""
+    pronunciation = ""
+    details.reset_index(drop=True, inplace=True)
+    for index, row in details.iterrows():
+        if row["pronunciation"]:
+            ipa = row["pronunciation"]
+        similar_spellings.append({
+            "id": index + 1,
+            "meaning_no": row["number"],
+            "meaning": row["meaning"],
+            "pos": row["pos"],
+            "language": row["language"],
+            "sentence": row["sentence"],
+            "source": row["source"],
+        })
 
+    response = {
+        "word": word,
+        "similar_spellings": similar_spellings,
+        "pronunciation": pronunciation
+    }
+
+    return response
