@@ -1,10 +1,13 @@
 from fastapi import APIRouter, HTTPException
 import pandas as pd
+import pathlib
 
 router = APIRouter()
 
+data_path = pathlib.Path(__file__).absolute().parents[1] / "data" / "demo_data.csv"
+
 # Load the CSV data into a DataFrame
-data = pd.read_csv("app/data/demo_data.csv")
+data = pd.read_csv(data_path)
 data = data.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
 
 data = data.fillna('')
@@ -14,6 +17,7 @@ data = data.fillna('')
 async def get_similar_spellings(word: str):
     try:
         filtered_data = data[data["word"] == word]
+        print(filtered_data)
 
         grouped_data = filtered_data.groupby(["number", "meaning"])["word"].count().reset_index()
 
@@ -72,7 +76,6 @@ async def get_words_by_letter(letter: str):
         word_data = filtered_data[filtered_data["word"] == word]
         grouped_data = word_data.groupby(["number", "meaning"])["word"].count().reset_index()
         for idx, row in grouped_data.iterrows():
-
             similar_spellings.append({
                 "id": idx + 1,
                 "meaning_no": row["number"],
@@ -88,6 +91,7 @@ async def get_words_by_letter(letter: str):
     return responses
 
 
+# this should be the actual response while searching after words
 @router.get("/dictionary/word")
 async def get_word_details(word: str):
     details = data[data["word"] == word]
