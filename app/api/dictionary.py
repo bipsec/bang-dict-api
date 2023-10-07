@@ -1,121 +1,157 @@
-from fastapi import APIRouter, HTTPException
-import pandas as pd
-import pathlib
+from fastapi import APIRouter, HTTPException, Query
+from sqlalchemy import func, or_
+from app.db.database import SessionLocal, WordMeaning
+
 
 router = APIRouter()
 
-data_path = pathlib.Path(__file__).absolute().parents[1] / "data" / "demo_data.csv"
-
-# Load the CSV data into a DataFrame
-data = pd.read_csv(data_path)
-data = data.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
-
-data = data.fillna('')
-
 
 @router.get("/dictionary/words")
-async def get_similar_spellings(word: str):
+async def get_similar_spellings(word: str, page: int = Query(default=1, ge=1), limit: int = Query(default=10, le=100)):
     try:
-        filtered_data = data[data["word"] == word]
-        print(filtered_data)
+        with SessionLocal() as session:
+            offset = (page - 1) * limit
 
-        grouped_data = filtered_data.groupby(["number", "meaning"])["word"].count().reset_index()
+            query = session.query(WordMeaning.number, WordMeaning.meaning)
+            query = query.filter(WordMeaning.words == word).group_by(WordMeaning.number, WordMeaning.meaning)
+            query = query.offset(offset).limit(limit)
+            results = query.all()
 
-        similar_spellings = []
-        for idx, row in grouped_data.iterrows():
-            similar_spellings.append({
-                "id": idx + 1,
-                "meaning_no": row["number"],
-                "meanings": [row["meaning"]]
-            })
+            similar_spellings = []
 
-        response = {
-            "similar_spellings": similar_spellings,
-            "word": word
-        }
-        return response
+            for idx, result in enumerate(results):
+                similar_spellings.append({
+                    "id": idx + 1,
+                    "meaning_no": result.number,
+                    "meanings": [result.meaning]
+                })
+
+            response = {
+                "similar_spellings": similar_spellings,
+                "word": word
+            }
+
+            return response
     except Exception as e:
         print("Error:", e)
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
 @router.get("/dictionary/all_words")
-async def get_all_words():
-    all_words = data["word"].unique().tolist()
-    all_responses = []
-    for word in all_words:
-        similar_spellings = []
-        filtered_data = data[data["word"] == word]
-        grouped_data = filtered_data.groupby(["number", "meaning"])["word"].count().reset_index()
-        for idx, row in grouped_data.iterrows():
-            similar_spellings.append({
-                "id": idx + 1,
-                "meaning_no": row["number"],
-                "meanings": [row["meaning"]]
-            })
+async def get_all_words(page: int = Query(default=1, ge=1), limit: int = Query(default=10, le=100)):
+    try:
+        with SessionLocal() as session:
+            offset = (page - 1) * limit
 
-        response = {
-            "similar_spellings": similar_spellings,
-            "word": word
-        }
-        all_responses.append(response)
+            query = session.query(WordMeaning.words.distinct())
+            query = query.offset(offset).limit(limit)
+            all_words = query.all()
 
-    return all_responses
+            all_responses = []
+            for word_tuple in all_words:
+                word = word_tuple[0]
+                similar_spellings = []
+
+                query = session.query(WordMeaning.number, WordMeaning.meaning)
+                query = query.filter(WordMeaning.words == word).group_by(WordMeaning.number, WordMeaning.meaning)
+                results = query.all()
+
+                for idx, result in enumerate(results):
+                    similar_spellings.append({
+                        "id": idx + 1,
+                        "meaning_no": result.number,
+                        "meanings": [result.meaning]
+                    })
+
+                response = {
+                    "word": word,
+                    "similar_spellings": similar_spellings,
+
+                }
+                all_responses.append(response)
+
+            return all_responses
+    except Exception as e:
+        print("Error:", e)
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
 @router.get("/dictionary/words_by_letter")
-async def get_words_by_letter(letter: str):
-    if len(letter) != 1 or not letter.isalpha():
-        raise HTTPException(status_code=400, detail="Invalid input. Please provide a single letter.")
+async def get_words_by_letter(letter: str, page: int = Query(default=1, ge=1), limit: int = Query(default=10, le=100)):
+    try:
+        if len(letter) != 1 or not letter.isalpha():
+            raise HTTPException(status_code=400, detail="Invalid input. Please provide a single letter.")
 
-    filtered_data = data[data["word"].str.startswith(letter, na=False)]
+        with SessionLocal() as session:
+            offset = (page - 1) * limit
 
-    responses = []
-    for word in filtered_data["word"].unique():
-        similar_spellings = []
-        word_data = filtered_data[filtered_data["word"] == word]
-        grouped_data = word_data.groupby(["number", "meaning"])["word"].count().reset_index()
-        for idx, row in grouped_data.iterrows():
-            similar_spellings.append({
-                "id": idx + 1,
-                "meaning_no": row["number"],
-                "meaning": row["meaning"],
-            })
+            query = session.query(WordMeaning.words).filter(or_(WordMeaning.words.like(f"{letter}%"), WordMeaning.words.like(f"{letter.upper()}%")))
+            query = query.distinct().offset(offset).limit(limit)
+            words = query.all()
 
-        response = {
-            "similar_spellings": similar_spellings,
-            "word": word
-        }
-        responses.append(response)
+            responses = []
+            for word_tuple in words:
+                word = word_tuple[0]
+                similar_spellings = []
 
-    return responses
+                query = session.query(WordMeaning.number, WordMeaning.meaning)
+                query = query.filter(WordMeaning.words == word).group_by(WordMeaning.number, WordMeaning.meaning)
+                results = query.all()
+
+                for idx, result in enumerate(results):
+                    similar_spellings.append({
+                        "id": idx + 1,
+                        "meaning_no": result.number,
+                        "meaning": result.meaning,
+                    })
+
+                response = {
+                    "word": word,
+                    "similar_spellings": similar_spellings,
+
+                }
+                responses.append(response)
+
+            return responses
+    except Exception as e:
+        print("Error:", e)
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
-# this should be the actual response while searching after words
+# word_details_page_response
 @router.get("/dictionary/word")
-async def get_word_details(word: str):
-    details = data[data["word"] == word]
-    similar_spellings = []
-    ipa = ""
-    pronunciation = ""
-    details.reset_index(drop=True, inplace=True)
-    for index, row in details.iterrows():
-        if row["pronunciation"]:
-            ipa = row["pronunciation"]
-        similar_spellings.append({
-            "id": index + 1,
-            "meaning_no": row["number"],
-            "meaning": row["meaning"],
-            "pos": row["pos"],
-            "language": row["language"],
-            "sentence": row["sentence"],
-            "source": row["source"],
-        })
+async def get_word_details(word: str, page: int = Query(default=1, ge=1), limit: int = Query(default=10, le=100)):
+    try:
+        with SessionLocal() as session:
+            offset = (page - 1) * limit
 
-    response = {
-        "word": word,
-        "similar_spellings": similar_spellings,
-        "pronunciation": pronunciation
-    }
+            # Query details for the specified word with pagination
+            query = session.query(WordMeaning).filter(WordMeaning.words == word)
+            query = query.offset(offset).limit(limit)
+            details = query.all()
 
-    return response
+            similar_spellings = []
+
+            for index, row in enumerate(details):
+
+                similar_spellings.append({
+                    "id": index + 1,
+                    "meaning_no": row.number,
+                    "meaning": row.meaning,
+                    "ipa": row.ipa,
+                    "pos": row.pos,
+                    "spelling": row.spelling,
+                    "language": row.root_lang,
+                    "sentence": row.sentence,
+                    "source": row.source,
+                })
+
+            response = {
+                "word": word,
+                "similar_spellings": similar_spellings,
+            }
+
+            return response
+    except Exception as e:
+        print("Error:", e)
+        raise HTTPException(status_code=500, detail="Internal Server Error")
