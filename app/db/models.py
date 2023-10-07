@@ -2,24 +2,25 @@ from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
-Base = declarative_base()
+# Base = declarative_base()
 
 
-class WordMeaning(Base):
-    __tablename__ = "word_meaning"
-
-    id = Column(Integer, primary_key=True, index=True)
-    pageNo = Column(String, unique=True, index=True)
-    words = Column(String, unique=True, index=True)
-    number = Column(String, unique=True, index=True)
-    spelling = Column(String, index=True)
-    meaning = Column(String, index=True)
-    pos = Column(String, unique=True, index=True)
-    ipa = Column(String, unique=True, index=True)
-    root_lang = Column(String, index=True)
-    type = Column(String, unique=True, index=True)
-    sentence = Column(String, unique=True, index=True)
-    source = Column(String, index=True)
+# class WordMeaning(Base):
+#     __tablename__ = "word_meaning"
+#
+#     id = Column(Integer, primary_key=True, index=True)
+#     pageNo = Column(String, unique=True, index=True)
+#     words = Column(String, unique=False, index=True)
+#     number = Column(String, nullable=True, index=True)
+#     spelling = Column(String, nullable=True, index=True)
+#     meaning = Column(String, nullable=True, index=True)
+#     pos = Column(String, nullable=True, unique=False, index=True)
+#     ipa = Column(String, unique=False, nullable=True, index=True)
+#     root_lang = Column(String, nullable=True, index=True)
+#     type = Column(String, unique=False, nullable=True, index=True)
+#     sentence = Column(String, unique=False, nullable=True,index=True)
+#     source = Column(String, index=True)
+#     audio = Column(String, nullable=True, index=True)
 
 #     ipa = relationship("IPA", back_populates="word_meaning")
 #     sentences = relationship("Sentence", back_populates="word_meaning")

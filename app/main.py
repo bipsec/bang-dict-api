@@ -6,8 +6,8 @@ import csv
 from app.api import dictionary, ipa
 
 from app.db.database import SessionLocal, Base
-from app.db.models import WordMeaning, Base
-from app.db.database import get_db
+# from app.db.models import WordMeaning, Base
+from app.db.database import get_db, WordMeaning
 
 app = FastAPI()
 
@@ -34,16 +34,16 @@ async def root():
 
 @app.post("/load-csv/")
 async def load_csv_to_db(db: Session = Depends(get_db)):
-    csv_path = Path("app/data/demo_data.csv")
+    csv_path = Path("app/data/bangla_dictionary.csv")
     if not csv_path.exists():
         raise HTTPException(status_code=404, detail="CSV file not found")
 
     with open(csv_path, newline="", encoding="utf-8") as csvfile:
         csvreader = csv.DictReader(csvfile)
         for row in csvreader:
-            # Check if any of the columns in the row have null or empty values
-            if any(value is None or value.strip() == '' for value in row.values()):
-                continue  # Skip rows with null or empty values
+            # if any(value is None or value.strip() == '' for value in row.values()):
+            #     continue
+
 
             try:
                 # Ensure that the keys in 'row' match the model column names
@@ -54,11 +54,12 @@ async def load_csv_to_db(db: Session = Depends(get_db)):
                     spelling=row['pronunciation'],
                     meaning=row['meaning'],
                     pos=row["pos"],
-                    ipa=row['IPA [B]'],
+                    ipa=row['IPA'],
                     root_lang=row['language'],
                     type=row['class'],
                     sentence=row['sentence'],
-                    source=row['source']
+                    source=row['source'],
+                    audio=row["Audio"]
                 )
                 db.add(word_meaning)
             except Exception as e:
