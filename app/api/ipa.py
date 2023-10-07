@@ -8,7 +8,7 @@ router = APIRouter()
 model_path = pathlib.Path(__file__).absolute().parents[1] / "model" / "ipa_model.pth"
 
 
-@router.get("/getipa/")
+@router.get("/get_ipa/")
 async def get_ipa_for_word(word: str):
     try:
         ipa = BanglaIPATranslator(model_path)
