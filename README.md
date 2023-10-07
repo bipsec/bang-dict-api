@@ -6,13 +6,9 @@
 ```sh
 bang-dict-api/
 ├── app/
-│   ├── celery/
+│   ├── api/
 │   │  ├──__init__.py
-│   │  ├──app.py
-│   │  ├──worker.py
-│   ├── core/
-│   │   ├── __init__.py
-│   │   ├── config.py
+│   │  ├──dictionary.py
 │   ├── events/
 │   │   ├── __init__.py
 │   │   └── startup_shutdown.py
