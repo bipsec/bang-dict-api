@@ -4,5 +4,6 @@ venv/
 env/
 .env
 celerybeat*
-/data/
 /model/
+/data/
+/*/*[! -~]*/
