@@ -7,21 +7,23 @@ from app.db.database import SessionLocal, WordMeaning
 router = APIRouter()
 
 @router.get("/dictionary/words")
-async def get_words(letter: str, page: int = Query(default=1, ge=1), limit: int = Query(default=10, le=100)):
+async def get_words(letter: str = Query(None, description="A single letter"), page: int = Query(default=1, ge=1), limit: int = Query(default=10, le=500)):
     try:
         print(letter)
-        if len(letter) != 1 or not letter.isalpha():
+        if letter is not None and (len(letter) != 1 or not letter.isalpha()):
             raise HTTPException(status_code=400, detail="Invalid input. Please provide a single letter.")
 
         with SessionLocal() as session:
             offset = (page - 1) * limit
 
-            query = session.query(WordMeaning.id, WordMeaning.words).filter(
-                or_(
-                    WordMeaning.words.like(f"{letter}%"),
-                    WordMeaning.words.like(f"{letter.upper()}%")
+            query = session.query(WordMeaning.id, WordMeaning.words)
+            if letter is not None:
+                query = query.filter(
+                    or_(
+                        WordMeaning.words.like(f"{letter}%"),
+                        WordMeaning.words.like(f"{letter.upper()}%")
+                    )
                 )
-            )
             query = query.distinct().offset(offset).limit(limit)
             words = query.all()
             print(words)
