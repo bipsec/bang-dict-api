@@ -1,5 +1,5 @@
 ## Table of Contents
-
+Here in this repo, a digitization of the Bengali Dictionary [Riddhi] is presented.
 
 ### Project Structure
 
