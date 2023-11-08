@@ -1,10 +1,10 @@
 import os
-from fastapi import APIRouter, HTTPException, Query, Depends
-from sqlalchemy import func, or_
-from sqlalchemy.orm import Session
-import soundfile as sf
+from fastapi import APIRouter, HTTPException, Depends
 
-from app.db.database import SessionLocal, Base, get_db, WordMeaning, AudioData
+from sqlalchemy.orm import Session
+
+
+from app.db.database import get_db, AudioData
 from app.scripts.audio import AudioHelper
 
 from pathlib import Path
@@ -26,14 +26,13 @@ async def load_csv_to_db(db: Session = Depends(get_db)):
             try:
                 # Use your AudioHelper or any method to get audio duration, type, and content
                 duration = AudioHelper.get_audio_duration(file_path)
-                audio_type = AudioHelper.get_audio_type(file_path)
+                # audio_type = AudioHelper.get_audio_type(file_path)
                 audio_content = AudioHelper.get_audio_content(file_path)
 
-                if duration is not None and audio_type is not None and audio_content is not None:
+                if duration is not None and  audio_content is not None:
                     audio_data = AudioData(
                         filename=filename,
                         duration=duration,
-                        audio_type=audio_type,
                         audio_file=audio_content
                     )
                     db.add(audio_data)

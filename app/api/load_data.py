@@ -65,9 +65,6 @@ async def load_csv_to_db(db: Session = Depends(get_db)):
     return {"message": "CSV data loaded successfully for IPA"}
 
 
-
-
-
 @router.post("/load_pos/")
 async def load_csv_to_db(db: Session = Depends(get_db)):
     csv_path = Path("app/data/bangla_dictionary.csv")
