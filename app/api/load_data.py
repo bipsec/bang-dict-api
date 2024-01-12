@@ -12,7 +12,8 @@ router = APIRouter()
 
 @router.post("/load_bangla_dictionary/")
 async def load_csv_to_db(db: Session = Depends(get_db)):
-    csv_path = Path("app/data/bangla_dictionary.csv")
+    csv_path = Path("app/data/bangla_dictionary_updated.csv")
+
     if not csv_path.exists():
         raise HTTPException(status_code=404, detail="CSV file not found")
 

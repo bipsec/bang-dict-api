@@ -9,7 +9,8 @@ services:
       - POSTGRES_USER=$POSTGRES_USER
       - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
     ports:
-      - '5432:5432'
+      - '5433:5432'
+
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -20,8 +21,9 @@ services:
     restart: always
     env_file: ./.env
     ports:
-      - 8000:8000
-      - 5557:5555
+      - 8001:8000
+      - 5558:5555
+
     volumes:
       - .:/app
     environment:
@@ -33,3 +35,4 @@ services:
 
 volumes:
   postgres_data:
+

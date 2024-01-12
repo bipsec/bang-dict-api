@@ -14,10 +14,13 @@ RUN apt-get update && apt-get install -y libpq-dev build-essential
 # install dependencies
 COPY requirements.txt run.sh ./
 RUN pip install --upgrade pip
-RUN pip install --no-cache-dir --upgrade -r requirements.txt && chmod +x ./run.sh
+
+RUN pip install --no-cache-dir --upgrade -r requirements.txt --default-timeout=1000 && chmod +x ./run.sh
+
 
 # copy project
 COPY . .
 
 # Set entrypoint
 ENTRYPOINT bash ./run.sh
+
