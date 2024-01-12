@@ -17,7 +17,6 @@ RUN pip install --upgrade pip
 
 RUN pip install --no-cache-dir --upgrade -r requirements.txt --default-timeout=1000 && chmod +x ./run.sh
 
-
 # copy project
 COPY . .
 

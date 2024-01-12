@@ -10,7 +10,6 @@ services:
       - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
     ports:
       - '5433:5432'
-
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -23,7 +22,6 @@ services:
     ports:
       - 8001:8000
       - 5558:5555
-
     volumes:
       - .:/app
     environment:
