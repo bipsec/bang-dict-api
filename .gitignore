@@ -7,3 +7,6 @@ celerybeat*
 /model/
 /data/
 /*/*[! -~]*/
+*.iml
+vcs.xml
+.idea/
