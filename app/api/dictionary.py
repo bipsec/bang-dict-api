@@ -1,35 +1,44 @@
 from fastapi import APIRouter, Query
-from fastapi import HTTPException, Path
+from fastapi import HTTPException, Path, Depends
+from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy import func
+from sqlalchemy.orm import Session
 from sqlalchemy import or_
-
+from sqlalchemy import create_engine, select, MetaData, Table
 from app.db.database import SessionLocal, WordMeaning
 
 router = APIRouter()
 
 @router.get("/dictionary/words")
-async def get_words(letter: str = Query(None, description="A single letter"), page: int = Query(default=1, ge=1), limit: int = Query(default=10, le=500)):
+async def get_words(
+        letter: str = Query(None, description="A single letter"),
+        page: int = Query(default=1, ge=1),
+        limit: int = Query(default=10, le=500)
+):
     try:
-        print(letter)
         if letter is not None and (len(letter) != 1 or not letter.isalpha()):
             raise HTTPException(status_code=400, detail="Invalid input. Please provide a single letter.")
 
         with SessionLocal() as session:
-            offset = (page - 1) * limit
-
+            # Create a query for WordMeaning
             query = session.query(WordMeaning.id, WordMeaning.words)
+
+            # Filter by letter
             if letter is not None:
                 query = query.filter(
-                    or_(
-                        WordMeaning.words.like(f"{letter}%"),
-                        WordMeaning.words.like(f"{letter.upper()}%")
-                    )
-                )
-            query = query.distinct().offset(offset).limit(limit)
-            words = query.all()
-            print(words)
-            responses = [{"id": word.id, "word": word.words} for word in words]
-            return responses
+                    or_(WordMeaning.words.like(f"{letter}%"), WordMeaning.words.like(f"{letter.upper()}%")))
 
+            # Calculate offset and limit for pagination
+            offset = (page - 1) * limit
+            query = query.distinct().offset(offset).limit(limit)
+
+            # Execute the query and fetch the results
+            words = query.all()
+
+            # Convert the results to the desired format
+            responses = [{"id": word.id, "word": word.words} for word in words]
+
+            return responses
 
     except Exception as e:
         print("Error:", e)
@@ -75,3 +84,36 @@ async def get_word_details(word: str, page: int = Query(default=1, ge=1), limit:
     except Exception as e:
         print("Error:", e)
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
+# @router.get("/dictionary/random_word")
+# async def get_random_word(session: Session = Depends(SessionLocal)):
+#     try:
+#         # Fetch a random row from WordMeaning table
+#         random_row = (
+#             session.query(WordMeaning)
+#             .order_by(text("RANDOM()"))
+#             .limit(1)
+#             .first()
+#         )
+# 
+#         # If no rows found, raise an exception
+#         if not random_row:
+#             raise HTTPException(status_code=404, detail="No words found in the database.")
+# 
+#         # Convert the row to a dictionary for JSON response
+#         word_data = {
+#             "id": random_row.id,
+#             "word": random_row.words,
+#             "meaning": random_row.meaning,
+#             "pos": random_row.pos,
+#             "spelling": random_row.spelling,
+#             "language": random_row.root_lang,
+#             "sentence": random_row.sentence,
+#             "source": random_row.source,
+#         }
+# 
+#         return word_data
+# 
+#     except Exception as e:
+#         print("Error:", e)
+#         raise HTTPException(status_code=500, detail="Internal Server Error")
