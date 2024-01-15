@@ -9,15 +9,29 @@ bang-dict-api/
 │   ├── api/
 │   │  ├──__init__.py
 │   │  ├──dictionary.py
+│   │  ├──ipa.py
+│   │  ├──load_data.py
+│   │  ├──load_audio.py
 │   ├── events/
 │   │   ├── __init__.py
 │   │   └── startup_shutdown.py
+│   ├── model/
+│   │   ├── ipa_model.pth
 │   ├── db/
 │   │   ├── __init__.py
 │   │   ├── database.py
+│   │   ├── models.py
+│   │   ├── schemas.py
 │   ├── data/
 │   │   ├── __init__.py
-│   │   ├── demo_data.csv
+│   │   ├── bangla_dictionary.csv
+│   │   ├── bangla_dictionary_updated.csv
+│   │   ├── sushmitIPAData.csv
+│   │   ├── word_ipa.csv
+│   ├── scripts/
+│   │   ├── audio.py
+│   │   ├── avro_testing.py
+│   │   ├── ipa_converter.py
 │   ├── services/
 │   │   ├── __init__.py
 │   │   └── ...
@@ -27,6 +41,8 @@ bang-dict-api/
 ├── Dockerfile
 ├── docker-compose.yml
 ├── README.md
+├── LICENSE
+├── run.sh
 └── requirements.txt
 ```
 
@@ -43,8 +59,8 @@ docker-compose up --build
 
 ```sh
 # for single word
-http://0.0.0.0:8002/dictionary/words?word=<word>
+http://0.0.0.0:8001/dictionary/words?word=<word>
 
 # for all word in the dictionary
-http://0.0.0.0:8002/dictionary/all_words
+http://0.0.0.0:8001/dictionary/all_words
 ```
