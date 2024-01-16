@@ -6,9 +6,9 @@ services:
     restart: always
 #    env_file: ./.env
     environment:
-      - POSTGRES_USER=${{ secrets.POSTGRES_USER }}
-      - POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-      - POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+      - POSTGRES_USER=$${{ secrets.POSTGRES_USER }}
+      - POSTGRES_PASSWORD=$${{ secrets.POSTGRES_PASSWORD }}
+      - POSTGRES_DB=$${{ secrets.POSTGRES_DB }}
     ports:
       - '5432:5432'
     volumes:
@@ -27,9 +27,9 @@ services:
       - .:/app
     environment:
       - DB_HOST=db
-      - DB_USER=${{ secrets.POSTGRES_USER }}
-      - DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-      - DB_NAME=${{ secrets.POSTGRES_DB }}
+      - DB_USER=$${{ secrets.POSTGRES_USER }}
+      - DB_PASSWORD=$${{ secrets.POSTGRES_PASSWORD }}
+      - DB_NAME=$${{ secrets.POSTGRES_DB }}
       - DB_PORT=5432
 
 volumes:
