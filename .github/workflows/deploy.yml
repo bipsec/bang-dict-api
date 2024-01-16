@@ -35,6 +35,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }} # Can be found as part of the Deploy Hook
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }} # Can be found as part of the Deploy Hook
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }} # Can be found as part of the Deploy Hook
+          POSTGRES_LOCAL_PORT: ${{ secrets.POSTGRES_LOCAL_PORT }} # Can be found as part of the Deploy Hook
+#          api-key: ${{ secrets.RENDER_API_KEY }}
 
       - name: Deploy to Production
         run: |
