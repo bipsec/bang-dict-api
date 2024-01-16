@@ -1,40 +1,32 @@
-name: CI/CD for deploying the bangla dicitonary
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
-
-  test:
-    name: Test
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: SSH into Server and Restart Docker Compose
-        uses: appleboy/ssh-action@master
-        with:
-        run: |
-          cd ~/bang-dict-api/app/
-          docker-compose down
-          git pull
-          docker-compose up --build -d
-        env:
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-          POSTGRES_LOCAL_PORT: ${{ secrets.POSTGRES_LOCAL_PORT }}
+    - name: Checkout Repository
+      uses: actions/checkout@v2
 
+    - name: Build and Test
+      run: |
+        docker-compose down
+        git pull
+        docker-compose up --build -d
 
-  # Heavily modified deploy job to fit render.com
   deploy:
-    name: Deploy
-    needs: [test] # Our tests must pass in order to run the deploy job
     runs-on: ubuntu-latest
-
+    needs: build
     steps:
-      - name: Deploy to production
-        uses: johnbeynon/render-deploy-action@v0.0.8
-        with:
-          service-id: ${{ secrets.SERVICE_ID }} # Can be found as part of the Deploy Hook
-          api-key: ${{ secrets.RENDER_API_KEY }} # Create your API key in Render Dashboard > Account Settings
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Build and Push Docker Image
+      run: |
+        docker-compose up --build -d
+        
