@@ -7,6 +7,7 @@ services:
 #    env_file: ./.env
     environment:
       - POSTGRES_USER=$${{ secrets.POSTGRES_USER }}
+      - POSTGRES_HOST=$${{ secrets.POSTGRES_HOST }}
       - POSTGRES_PASSWORD=$${{ secrets.POSTGRES_PASSWORD }}
       - POSTGRES_DB=$${{ secrets.POSTGRES_DB }}
     ports:
@@ -26,7 +27,7 @@ services:
     volumes:
       - .:/app
     environment:
-      - DB_HOST=db
+      - DB_HOST=$${{ secrets.POSTGRES_HOST }}
       - DB_USER=$${{ secrets.POSTGRES_USER }}
       - DB_PASSWORD=$${{ secrets.POSTGRES_PASSWORD }}
       - DB_NAME=$${{ secrets.POSTGRES_DB }}
