@@ -26,6 +26,8 @@ jobs:
 
       - name: Build and Push Docker Images
         run: |
+          docker-compose up -d db
+          docker-compose up -d web
           docker-compose build
           docker-compose push
 
@@ -44,4 +46,6 @@ jobs:
 
       - name: Deploy to Production
         run: |
-          docker-compose -f docker-compose.yml up -d
+          docker-compose up -d db
+          docker-compose up -d web
+          docker-compose -f docker-compose.yml --build -d
