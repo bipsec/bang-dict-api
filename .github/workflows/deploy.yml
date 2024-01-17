@@ -24,13 +24,6 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Build and Push Docker Images
-        run: |
-          docker-compose up -d db
-          docker-compose up -d web
-          docker-compose up --build
-          docker-compose push
-
   deploy:
     runs-on: ubuntu-latest
     needs: build
@@ -42,11 +35,10 @@ jobs:
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }} # Can be found as part of the Deploy Hook
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }} # Can be found as part of the Deploy Hook
           POSTGRES_LOCAL_PORT: ${{ secrets.POSTGRES_LOCAL_PORT }} # Can be found as part of the Deploy Hook
-#          api-key: ${{ secrets.RENDER_API_KEY }}
+          api-key: ${{ secrets.RENDER_API_KEY }}
 
       - name: Deploy to Production
         run: |
           docker-compose up -d db
           docker-compose up -d web
           docker-compose up --build
-          docker-compose -f docker-compose.yml --build -d
