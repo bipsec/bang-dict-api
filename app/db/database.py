@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import Session
 
 
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@localhost:5433/postgres"
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@db:5432/postgres"
 
 Base = declarative_base()
 
